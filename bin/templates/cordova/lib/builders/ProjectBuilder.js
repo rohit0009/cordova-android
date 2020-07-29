@@ -299,20 +299,18 @@ class ProjectBuilder {
                 return self.runGradleWrapper(gradlePath);
             }).then(function () {
                 return self.prepBuildFiles();
-            }).then(() => {
-                // update/set the distributionUrl in the gradle-wrapper.properties
-                const gradleWrapperPropertiesPath = path.join(self.root, 'gradle/wrapper/gradle-wrapper.properties');
-                const gradleWrapperProperties = createEditor(gradleWrapperPropertiesPath);
-                const distributionUrl = process.env.CORDOVA_ANDROID_GRADLE_DISTRIBUTION_URL || 'https://services.gradle.org/distributions/gradle-6.1.1-all.zip';
-                gradleWrapperProperties.set('distributionUrl', distributionUrl);
-                gradleWrapperProperties.save();
+            }).then(function () {
+                // If the gradle distribution URL is set, make sure it points to version we want.
+                // If it's not set, do nothing, assuming that we're using a future version of gradle that we don't want to mess with.
+                // For some reason, using ^ and $ don't work.  This does the job, though.
+                var distributionUrlRegex = /distributionUrl.*zip/;
+                var distributionUrl = process.env['CORDOVA_ANDROID_GRADLE_DISTRIBUTION_URL'] || 'https\\://services.gradle.org/distributions/gradle-6.1.1-all.zip';
+                var gradleWrapperPropertiesPath = path.join(self.root, 'gradle', 'wrapper', 'gradle-wrapper.properties');
+                shell.chmod('u+w', gradleWrapperPropertiesPath);
+                shell.sed('-i', distributionUrlRegex, 'distributionUrl=' + distributionUrl, gradleWrapperPropertiesPath);
 
-                events.emit('verbose', `Gradle Distribution URL: ${distributionUrl}`);
-            })
-            .then(() => {
-                const signingPropertiesPath = path.join(self.root, `${opts.buildType}${SIGNING_PROPERTIES}`);
-
-                if (fs.existsSync(signingPropertiesPath)) fs.removeSync(signingPropertiesPath);
+                var propertiesFile = opts.buildType + SIGNING_PROPERTIES;
+                var propertiesFilePath = path.join(self.root, propertiesFile);
                 if (opts.packageInfo) {
                     fs.ensureFileSync(signingPropertiesPath);
                     const signingProperties = createEditor(signingPropertiesPath);

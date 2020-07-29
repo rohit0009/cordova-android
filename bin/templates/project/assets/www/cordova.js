@@ -1,5 +1,5 @@
 // Platform: android
-// 538a985db128858c0a0eb4dd40fb9c8e5433fc94
+// 74fdba8b327b2a13b4366dd141b52def96d4cb56
 /*
  Licensed to the Apache Software Foundation (ASF) under one
  or more contributor license agreements.  See the NOTICE file
@@ -19,7 +19,7 @@
  under the License.
 */
 ;(function() {
-var PLATFORM_VERSION_BUILD_LABEL = '9.1.0-dev';
+var PLATFORM_VERSION_BUILD_LABEL = '8.1.0';
 // file: src/scripts/require.js
 var require;
 var define;
@@ -70,7 +70,7 @@ var define;
 
     define = function (id, factory) {
         if (Object.prototype.hasOwnProperty.call(modules, id)) {
-            throw new Error('module ' + id + ' already defined');
+            throw 'module ' + id + ' already defined';
         }
 
         modules[id] = {
@@ -202,16 +202,8 @@ var cordova = {
      * @return object
      */
     getOriginalHandlers: function () {
-        return {
-            document: {
-                addEventListener: m_document_addEventListener,
-                removeEventListener: m_document_removeEventListener
-            },
-            window: {
-                addEventListener: m_window_addEventListener,
-                removeEventListener: m_window_removeEventListener
-            }
-        };
+        return { 'document': { 'addEventListener': m_document_addEventListener, 'removeEventListener': m_document_removeEventListener },
+            'window': { 'addEventListener': m_window_addEventListener, 'removeEventListener': m_window_removeEventListener } };
     },
 
     /**
